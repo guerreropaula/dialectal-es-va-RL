@@ -30,11 +30,13 @@ Evaluated on 1,000 sentences from [`gplsi/ES-VA_translation_test`](https://huggi
 | GRPO v1 | 81.65 | 56.94 | 23.96 | 0.481 | 0.926 | 15.9% |
 | **GRPO v2** ★ | **84.68** | **62.16** | **20.63** | **0.544** | **0.936** | 36.2% |
 
-![Translation Quality Metrics](assets/translation_metrics.jpeg)
+<img src="assets/translation_metrics.jpeg" width="450">
+<br>
 
-![Multi-dimensional Evaluation](assets/multidimensional_eval.jpeg)
+<img src="assets/multidimensional_eval.jpeg" width="450">
+<br>
 
-![Dialectal Valencian Score](assets/dialectal_score.jpeg)
+<img src="assets/dialectal_score.jpeg" width="450">
 
 ---
 
