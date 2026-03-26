@@ -30,7 +30,7 @@ Evaluated on 1,000 sentences from [`gplsi/ES-VA_translation_test`](https://huggi
 | GRPO v1 | 81.65 | 56.94 | 23.96 | 0.481 | 0.926 | 15.9% |
 | **GRPO v2** ★ | **84.68** | **62.16** | **20.63** | **0.544** | **0.936** | 36.2% |
 
-<img src="assets/translation_metrics.jpeg" width="450">
+<img src="assets/translation_metrics.jpeg" width="600">
 <br>
 
 <img src="assets/multidimensional_eval.jpeg" width="450">
