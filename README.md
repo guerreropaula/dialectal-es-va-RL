@@ -121,7 +121,7 @@ Run notebooks in order on Google Colab (A100 recommended).
 | Dataset | Usage |
 |---|---|
 | [`gplsi/amic_parallel`](https://huggingface.co/datasets/gplsi/amic_parallel) | SFT and GRPO training (ES–VA parallel) |
-| [`gplsi/ES-VA_translation_test`](https://huggingface.co/datasets/gplsi/ES-VA_translation_test) | Held-out evaluation |
+| [`gplsi/ES-VA_translation_test`](https://huggingface.co/datasets/gplsi/ES-VA_translation_test) | Evaluation test set|
 | TildeMODEL, DOGC, Europarl | HT/MT classifier training (standard Catalan) |
 
 ---
