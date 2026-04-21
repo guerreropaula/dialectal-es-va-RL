@@ -91,7 +91,7 @@ r = 0.5 * chrF(hyp, ref) + 0.3 * COMET(src, hyp, ref) \
 ├── scripts/
 │   ├── 01_sft.py                     # SFT — QLoRA fine-tuning on 50k ES–VA pairs
 │   ├── 02_ht_mt_classifier.py        # HT/MT translationese classifier (RoBERTa-ca)
-│   ├── 03_grpo_v1..py                # GRPOv1 — chrF + naturalness classifier reward
+│   ├── 03_grpo_v1.py                 # GRPOv1 — chrF + naturalness classifier reward
 │   ├── 04_grpo_v2.py                 # GRPOv2 — composite reward ★
 │   └── 05_evaluation.py              # Full evaluation + dialectal analysis
 ├── results/
