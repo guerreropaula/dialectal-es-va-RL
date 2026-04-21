@@ -1,21 +1,16 @@
-# Enhancing LLM Translation Performance for Spanish-Valencian through Supervised Fine-tuning and Reinforcement Learning
+```markdown
+# Enhancing LLM Translation Performance for Spanish–Valencian through Supervised Fine-Tuning and Reinforcement Learning
 
-**Fine-tuning `google/translategemma-4b-it` for the low-resource ES-VA direction using SFT and GRPO**
+> **EAMT 2026** · University of the Basque Country (UPV/EHU)  
+> Paula Guerrero Castelló · `pguerrero005@ikasle.ehu.eus`
 
-> MSc Language Analysis and Processing · University of the Basque Country · 2025–2026  
-> Author: Paula Guerrero
+This repository contains the code, models, and evaluation scripts for our EAMT 2026 paper on adapting a translation-specialized LLM to the low-resource Spanish→Valencian (ES→VA) direction using supervised fine-tuning (SFT) and Group Relative Policy Optimization (GRPO).
 
 ---
 
-## Overview
-This project adapts **TranslateGemma-4B** using three strategies:
+## Abstract
 
-| Strategy | Description |
-|---|---|
-| **Baseline** | `google/translategemma-4b-it` zero-shot (ES→CA, no Valencian awareness) |
-| **SFT** | Supervised fine-tuning on 50k ES→VA pairs from `gplsi/amic_parallel` |
-| **GRPO v1** | RL from SFT checkpoint — reward: chrF + P(HT\|text) translationese classifier |
-| **GRPO v2** ★ | RL from SFT checkpoint — reward: chrF + COMET + TTR + copy penalty — **best** |
+Valencian lacks a dedicated language code in most multilingual MT systems and is systematically rendered as standard (Eastern) Catalan. We adapt **TranslateGemma-4B-IT** through three post-training strategies—SFT, GRPO with a learned naturalness classifier (GRPOv1), and GRPO with a composite automatic-metric reward (GRPOv2)—using only publicly available corpora and QLoRA-based training on commodity hardware. Our results show that SFT delivers the largest single-step gain, while GRPOv2 surpasses SFT on all five standard MT metrics. A classifier-based naturalness reward (GRPOv1) causes dialect suppression, underscoring that reward-function alignment with the target variety is critical for dialectal MT.
 
 ---
 
@@ -23,38 +18,69 @@ This project adapts **TranslateGemma-4B** using three strategies:
 
 Evaluated on 1,000 sentences from [`gplsi/ES-VA_translation_test`](https://huggingface.co/datasets/gplsi/ES-VA_translation_test).
 
-| Model | chrF ↑ | BLEU ↑ | TER ↓ | BLEURT ↑ | COMET ↑ | Dialectal VA ↑ |
-|---|---|---|---|---|---|---|
-| Baseline | 69.02 | 39.22 | 40.30 | 0.258 | 0.906 | 3.2% |
-| SFT | 83.16 | 60.16 | 22.80 | 0.524 | 0.934 | **41.0%** |
-| GRPO v1 | 81.65 | 56.94 | 23.96 | 0.481 | 0.926 | 15.9% |
-| **GRPO v2** ★ | **84.68** | **62.16** | **20.63** | **0.544** | **0.936** | 36.2% |
+### Automatic MT Quality
 
-<img src="assets/translation_metrics.jpeg" width="600">
-<br>
+| System | chrF ↑ | BLEU ↑ | TER ↓ | BLEURT ↑ | COMET ↑ |
+|---|---|---|---|---|---|
+| Baseline | 69.02 | 39.22 | 40.30 | 0.258 | 0.906 |
+| SFT | 83.16 | 60.16 | 22.80 | 0.524 | 0.934 |
+| GRPOv1 | 81.65 | 56.94 | 23.96 | 0.481 | 0.926 |
+| **GRPOv2** ★ | **84.68** | **62.16** | **20.63** | **0.544** | **0.936** |
 
-<img src="assets/multidimensional_eval.jpeg" width="450">
-<br>
+### Dialectal Valencian Score (DVS)
 
-<img src="assets/dialectal_score.jpeg" width="450">
+DVS measures the rate at which a system produces Valencian-specific morpho-lexical forms over 30 contrastive CA–VA pairs.
+
+| System | DVS ↑ |
+|---|---|
+| Baseline | 3.2% |
+| **SFT** | **41.0%** |
+| GRPOv1 | 15.9% |
+| GRPOv2 ★ | 36.2% |
+
+### Feature-level DVS (selected pairs)
+
+| CA form | VA form | Baseline | SFT | GRPOv1 | GRPOv2 |
+|---|---|---|---|---|---|
+| *petit* | *xicotet* | 0% | 100% | 0% | 100% |
+| *veure* | *vore* | 0% | 83% | 0% | 17% |
+| *avui* | *hui* | 0% | 71% | 0% | 86% |
+| *seva* | *seua* | 0% | 100% | 45% | 100% |
 
 ---
 
-## Pipeline
+## Training Pipeline
 
 ```
-google/translategemma-4b-it (baseline)
+TranslateGemma-4B-IT (zero-shot baseline)
         │
         ▼
-   SFT on 50k ES→VA pairs (gplsi/amic_parallel)
-   LoRA r=16, α=32, lr=2e-4, 2000 steps
+   SFT — 50k ES–VA pairs (gplsi/amic_parallel)
+   QLoRA r=16, α=32, 4-bit NF4, 3 epochs
         │
-        ├──────────────────────────────────────────┐
-        ▼                                          ▼
-  GRPO v1 (5k pairs)                     GRPO v2 (10k pairs) ★
-  reward = (1-α)·chrF + α·P(HT|text)     reward = 0.5·chrF + 0.3·COMET
-  α: 0→0.3 warm-up over 50 steps                 + 0.2·TTR − copy_penalty
-  200 steps, lr=5e-6, β=0.04             200 steps, lr=5e-6, β=0.04
+        ├─────────────────────────┐
+        ▼                         ▼
+   GRPOv1 (5k pairs)         GRPOv2 (10k pairs) ★
+   r = (1−α)·chrF + α·P(HT)  r = 0.5·chrF + 0.3·COMET
+   α: 0→0.3 warm-up           + 0.2·TTR − copy_penalty
+   100 steps, β=0.04          200 steps, β=0.04
+```
+
+---
+
+## Reward Functions
+
+**GRPOv1**
+```python
+r = (1 - alpha) * chrF(hyp, ref) / 100 + alpha * P(HT | hyp)
+# alpha annealed from 0 to 0.3 over first 50 steps
+```
+
+**GRPOv2** ★
+```python
+r = 0.5 * chrF(hyp, ref) + 0.3 * COMET(src, hyp, ref) \
+  + 0.2 * TTR(hyp) - copy_penalty(src, hyp)
+# copy_penalty = 1.0 if hyp == src else 0.0
 ```
 
 ---
@@ -64,78 +90,62 @@ google/translategemma-4b-it (baseline)
 ```
 .
 ├── notebooks/
-│   ├── 01_sft.ipynb                  # SFT — LoRA fine-tuning on 50k ES→VA pairs
-│   ├── 02_ht_mt_classifier.ipynb     # HT vs MT translationese classifier (RoBERTa-ca)
-│   ├── 03_grpo_v1.ipynb              # GRPO v1 — reward: chrF + P(HT|text)
-│   ├── 04_grpo_v2.ipynb              # GRPO v2 — composite reward ★
+│   ├── 01_sft.ipynb                  # SFT — QLoRA fine-tuning on 50k ES–VA pairs
+│   ├── 02_ht_mt_classifier.ipynb     # HT/MT translationese classifier (RoBERTa-ca)
+│   ├── 03_grpo_v1.ipynb              # GRPOv1 — chrF + naturalness classifier reward
+│   ├── 04_grpo_v2.ipynb              # GRPOv2 — composite reward ★
 │   └── 05_evaluation.ipynb           # Full evaluation + dialectal analysis
 ├── results/
-│   ├── summary_metrics.xlsx          # Final metrics for all 4 models
-│   └── eval_results_1k.xlsx          # Per-sentence metrics (1k samples)
-├── assets/
-│   ├── translation_metrics.jpeg
-│   ├── multidimensional_eval.jpeg
-│   └── dialectal_score.jpeg
+│   ├── summary_metrics.xlsx          # Aggregated metrics for all systems
+│   └── eval_results_1k.xlsx          # Per-sentence metrics (1,000 sentences)
 ├── requirements.txt
 └── README.md
 ```
 
+Run notebooks in order on Google Colab (A100 recommended).
+
 ---
 
-## HuggingFace Models
+## Models and Datasets
 
-| Model | Hub |
+### HuggingFace Models
+
+| System | Model Hub |
 |---|---|
 | SFT | [`guerreropaula/translategemma4b-sft-es-va2`](https://huggingface.co/guerreropaula/translategemma4b-sft-es-va2) |
-| GRPO v1 | [`guerreropaula/80translategemma4b-grpo-es-va`](https://huggingface.co/guerreropaula/80translategemma4b-grpo-es-va) |
-| GRPO v2 ★ | [`guerreropaula/translategemma4b-grpo2-es-va`](https://huggingface.co/guerreropaula/translategemma4b-grpo2-es-va) |
+| GRPOv1 | [`guerreropaula/80translategemma4b-grpo-es-va`](https://huggingface.co/guerreropaula/80translategemma4b-grpo-es-va) |
+| GRPOv2 ★ | [`guerreropaula/translategemma4b-grpo2-es-va`](https://huggingface.co/guerreropaula/translategemma4b-grpo2-es-va) |
 | HT/MT Classifier | [`guerreropaula/ht_mt_classifier_best`](https://huggingface.co/guerreropaula/ht_mt_classifier_best) |
 
----
-
-## Datasets
+### Datasets
 
 | Dataset | Usage |
 |---|---|
-| [`gplsi/amic_parallel`](https://huggingface.co/datasets/gplsi/amic_parallel) | SFT + GRPO training (ES–VA parallel) |
+| [`gplsi/amic_parallel`](https://huggingface.co/datasets/gplsi/amic_parallel) | SFT and GRPO training (ES–VA parallel) |
 | [`gplsi/ES-VA_translation_test`](https://huggingface.co/datasets/gplsi/ES-VA_translation_test) | Held-out evaluation |
-| [Softcatalà parallel corpus](https://github.com/Softcatala/parallel-catalan-corpus) | HT/MT classifier training |
-
----
-
-Run notebooks in order on **Google Colab** (A100 recommended):
-
-1. `01_sft.ipynb` — SFT training
-2. `02_ht_mt_classifier.ipynb` — train the translationese classifier first
-3. `03_grpo_v1.ipynb` — GRPO v1
-4. `04_grpo_v2.ipynb` — GRPO v2 ★
-5. `05_evaluation.ipynb` — full evaluation for 4 approaches + dialectal analysis
-
----
-
-## Reward Functions
-
-**GRPO v1**
-```python
-r = (1 - α) * chrF(hyp, ref) / 100 + α * P(HT | hyp)
-# α = 0 → 0.3  (linear warm-up after 50 steps)
-```
-
-**GRPO v2** ★
-```python
-r = 0.5 * chrF(hyp, ref) + 0.3 * COMET(src, hyp, ref) + 0.2 * TTR(hyp) + copy_penalty(src, hyp)
-# copy_penalty = -1.0 if hyp == src else 0.0
-```
+| TildeMODEL, DOGC, Europarl | HT/MT classifier training (standard Catalan) |
 
 ---
 
 ## Citation
 
+If you use this work, please cite:
+
 ```bibtex
-@misc{guerrero2026translategemma_va,
-  title   = {Enhancing LLM Translation Performance for Spanish-Valencian through Supervised Fine-tuning and Reinforcement Learning},
-  author  = {Guerrero, Paula},
-  year    = {2026},
-  note    = {MSc Deep Learning Project, University of the Basque Country}
+@inproceedings{guerrero-2026-enhancing,
+  title     = {Enhancing {LLM} Translation Performance for {Spanish}-{Valencian}
+               through Supervised Fine-tuning and Reinforcement Learning},
+  author    = {Guerrero Castell{\'o}, Paula},
+  booktitle = {Proceedings of the 25th Annual Conference of the
+               European Association for Machine Translation (EAMT 2026)},
+  year      = {2026}
 }
 ```
+
+---
+
+## License
+
+This work is licensed under a [Creative Commons Attribution-NoDerivatives 4.0 International License](https://creativecommons.org/licenses/by-nd/4.0/) (CC BY-ND 4.0).
+
+© 2026 The authors. No derivative works permitted.```
