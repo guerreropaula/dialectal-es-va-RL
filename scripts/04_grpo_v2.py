@@ -1,7 +1,7 @@
 # =============================================================================
 # 04_grpo_v2.py
 # GRPO v2 — Composite Automatic-Metric Reward (chrF + COMET + TTR + copy penalty)
-# Starting from SFT checkpoint: guerreropaula/translategemma4b-sft-es-va2
+# Starting from SFT checkpoint: guerreropaula/translategemma4b-sft-es-va
 # =============================================================================
 
 import os
@@ -333,11 +333,11 @@ peft_model    = PeftModel.from_pretrained(base_model_reload, BEST_CKPT)
 merged_model  = peft_model.merge_and_unload()
 
 merged_model.push_to_hub(
-    "guerreropaula/translategemma4b-grpo2-es-va-best-merged",
+    "guerreropaula/translategemma4b-grpov2-es-va",
     safe_serialization = True,
     max_shard_size     = "2GB",
 )
-tokenizer.push_to_hub("guerreropaula/translategemma4b-grpo2-es-va-best-merged")
+tokenizer.push_to_hub("guerreropaula/translategemma4b-grpov2-es-va")
 
 
 # =============================================================================
