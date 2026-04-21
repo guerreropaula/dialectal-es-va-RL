@@ -1,4 +1,3 @@
-```markdown
 # Enhancing LLM Translation Performance for Spanish–Valencian through Supervised Fine-Tuning and Reinforcement Learning
 
 > **EAMT 2026** · University of the Basque Country (UPV/EHU)  
@@ -148,4 +147,4 @@ If you use this work, please cite:
 
 This work is licensed under a [Creative Commons Attribution-NoDerivatives 4.0 International License](https://creativecommons.org/licenses/by-nd/4.0/) (CC BY-ND 4.0).
 
-© 2026 The authors. No derivative works permitted.```
+© 2026 The authors. No derivative works permitted.
