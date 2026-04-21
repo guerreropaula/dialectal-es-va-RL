@@ -367,5 +367,5 @@ merged.save_pretrained(MERGED_DIR)
 tokenizer.save_pretrained(MERGED_DIR)
 print(f"Merged model saved to: {MERGED_DIR}")
 
-merged.push_to_hub("guerreropaula/80translategemma4b-grpo-es-va", token=HF_TOKEN)
-tokenizer.push_to_hub("guerreropaula/80translategemma4b-grpo-es-va", token=HF_TOKEN)
+merged.push_to_hub("guerreropaula/translategemma4b-grpov1-es-va", token=HF_TOKEN)
+tokenizer.push_to_hub("guerreropaula/translategemma4b-grpov1-es-va", token=HF_TOKEN)
