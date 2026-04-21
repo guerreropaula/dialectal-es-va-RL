@@ -1,7 +1,7 @@
 # =============================================================================
 # 03_grpo_v1.py
 # GRPO v1 — chrF + HT/MT Naturalness Classifier Reward
-# Starting from SFT checkpoint: guerreropaula/translategemma4b-sft-es-va2
+# Starting from SFT checkpoint: guerreropaula/translategemma4b-sft-es-va
 # =============================================================================
 
 import gc
