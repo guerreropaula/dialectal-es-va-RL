@@ -152,10 +152,10 @@ If you use this work, please cite:
 
 ```bibtex
 @inproceedings{guerrero-2026-enhancing,
-  title     = {Enhancing {LLM} Translation Performance for {Spanish}-{Valencian}
-               through Supervised Fine-tuning and Reinforcement Learning},
+  title     = {{Enhancing LLM Translation Performance for Spanish-Valencian
+               through Supervised Fine-tuning and Reinforcement Learning}},
   author    = {Guerrero Castell{\'o}, Paula},
-  booktitle = {Proceedings of the 25th Annual Conference of the
+  booktitle = {Proceedings of the 26th Annual Conference of the
                European Association for Machine Translation (EAMT 2026)},
   year      = {2026}
 }
